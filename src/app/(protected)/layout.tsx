@@ -1,19 +1,45 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import { useTheme } from "next-themes";
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) {
+        router.replace("/login");
+      } else {
+        setLoading(false);
+      }
+    });
+  }, [router]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.replace("/login");
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-6">
+          <Image src="/logo.png" alt="Tofil Logo" width={64} height={64} className="mx-auto" />
+          <div className="text-lg animate-pulse">Checking authentication…</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between px-4 py-2 border-b">

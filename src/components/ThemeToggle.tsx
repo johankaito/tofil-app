@@ -3,8 +3,8 @@ import { useTheme } from "next-themes";
 import { IconSun, IconMoon } from "@tabler/icons-react";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const isDark = theme === "dark";
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}

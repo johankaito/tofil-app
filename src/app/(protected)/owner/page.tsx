@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { useTheme } from "next-themes";
 
 const jobs = [
   { id: 1, title: "Job 1", status: "PENDING_REVIEW", location: "NYC", contractor: "Alice" },
@@ -8,6 +9,9 @@ const jobs = [
 ];
 
 export default function OwnerDashboard() {
+  const { resolvedTheme } = useTheme();
+  // Example: you can use resolvedTheme for custom logic
+  // console.log('Current theme:', resolvedTheme);
   return (
     <div className="bg-background min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Owner Dashboard</h1>

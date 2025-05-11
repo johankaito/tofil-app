@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { useTheme } from "next-themes";
 
 const jobs = [
   { id: 1, title: "Job 1", location: "NYC", description: "Description of the job..." },
@@ -12,6 +13,9 @@ function applyToJob(jobId: number) {
 }
 
 export default function ContractorDashboard() {
+  const { resolvedTheme } = useTheme();
+  // Example: you can use resolvedTheme for custom logic
+  // console.log('Current theme:', resolvedTheme);
   return (
     <div className="bg-background min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Contractor Dashboard</h1>
