@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useUser } from "@/components/UserContext";
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
@@ -16,13 +17,25 @@ export default function LoginPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
+  const { setUser } = useUser();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       const user = data.user;
       if (user) {
-        // TODO: fetch user.type from your DB, here we stub OWNER
-        const userType = "OWNER"; // Replace with real fetch
+        // Fetch corresponding app user
+        let { data: tofilUser, error } = await supabase
+          .from("User")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        if (!tofilUser) {
+          // If not found, create user in app DB
+          const { data: inserted } = await supabase.from("User").insert({ id: user.id, email: user.email, type: "OWNER" }).select().single();
+          tofilUser = inserted;
+        }
+        setUser({ supabaseUser: user, tofilUser });
+        const userType = tofilUser?.type || "OWNER";
         if (userType === "OWNER") router.replace("/owner");
         else if (userType === "CONTRACTOR") router.replace("/contractor");
         else if (userType === "ADMIN") router.replace("/admin");
@@ -30,7 +43,7 @@ export default function LoginPage() {
         setLoading(false);
       }
     });
-  }, [router]);
+  }, [router, setUser]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

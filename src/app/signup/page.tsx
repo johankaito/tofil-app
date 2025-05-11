@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useUser } from "@/components/UserContext";
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
@@ -15,6 +16,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
+  const { setUser } = useUser();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -35,7 +37,30 @@ export default function SignupPage() {
     setMessage("");
     const { error } = await supabase.auth.signInWithOtp({ email });
     if (error) setMessage(error.message);
-    else setMessage("Check your email for the magic link!");
+    else {
+      setMessage("Check your email for the magic link!");
+      // After signup, poll for user and create in app DB
+      const pollForUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Check if user exists in app DB
+          const { data: existing } = await supabase
+            .from("User")
+            .select("*")
+            .eq("id", user.id)
+            .single();
+          let tofilUser = existing;
+          if (!existing) {
+            const { data: inserted } = await supabase.from("User").insert({ id: user.id, email: user.email, type: "OWNER" }).select().single();
+            tofilUser = inserted;
+          }
+          setUser({ supabaseUser: user, tofilUser });
+        } else {
+          setTimeout(pollForUser, 1000);
+        }
+      };
+      pollForUser();
+    }
     setLoading(false);
   };
 

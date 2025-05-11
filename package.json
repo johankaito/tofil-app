@@ -9,7 +9,9 @@
     "lint": "next lint",
     "prisma:generate": "pnpm exec prisma generate --schema=prisma/schema.prisma",
     "createMigrateDev": "pnpm exec zenstack generate && pnpm run prisma:generate && pnpm exec prisma migrate dev --create-only --schema=prisma/schema.prisma --name",
-    "prisma:migrate:deploy": "pnpm exec prisma migrate deploy --schema=prisma/schema.prisma"
+    "prisma:migrate:deploy": "pnpm exec prisma migrate deploy --schema=prisma/schema.prisma",
+    "prisma:migrate:deleteSingle": "sh ./delete-migration.sh",
+    "prisma:migrate:resolve": "pnpm exec prisma migrate resolve --applied --schema=prisma/schema.prisma --migration"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",
@@ -36,6 +38,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "jsdom": "^26.1.0",
