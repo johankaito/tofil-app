@@ -17,38 +17,45 @@ module.exports = {
     },
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        border: "#22223B",
+        input: "#22223B",
+        ring: "#8DFE3C",
+        background: {
+          DEFAULT: "#101126",
+          sidebar: "#101126",
+          table: "#23243A",
+        },
+        foreground: {
+          DEFAULT: "#FFFFFF",
+          dark: "#22223B",
+        },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#8DFE3C",
+          foreground: "#101126",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "#101126",
+          foreground: "#FFFFFF",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "#181A2A",
+          foreground: "#FFFFFF",
+        },
+        accent: {
+          DEFAULT: "#8DFE3C",
+          foreground: "#101126",
+        },
+        muted: {
+          DEFAULT: "#22223B",
+          foreground: "#FFFFFF",
+        },
+        popover: {
+          DEFAULT: "#101126",
+          foreground: "#FFFFFF",
+        },
+        destructive: {
+          DEFAULT: "#FF5555",
+          foreground: "#FFFFFF",
         },
       },
       borderRadius: {
