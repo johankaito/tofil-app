@@ -32,3 +32,6 @@
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ZenStack/Prisma generated schema
+prisma/schema.prisma

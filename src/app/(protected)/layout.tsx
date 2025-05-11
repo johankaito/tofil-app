@@ -13,12 +13,20 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
   const [loading, setLoading] = useState(true);
+  const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace("/login");
       } else {
+        // Fetch user type
+        const { data: profile } = await supabase
+          .from("User")
+          .select("type")
+          .eq("id", data.user.id)
+          .single();
+        setUserType(profile?.type || null);
         setLoading(false);
       }
     });
@@ -56,6 +64,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="mb-4 font-semibold">Sidebar</div>
           <ul className="space-y-2">
             <li className="font-medium">Dashboard</li>
+            {userType === "MANAGER" && (
+              <li>
+                <a href="/manager" className="font-medium hover:underline text-accent">Manager</a>
+              </li>
+            )}
             {/* Future items */}
           </ul>
         </aside>

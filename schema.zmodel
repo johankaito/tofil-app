@@ -9,9 +9,15 @@ model User {
   type         UserType
   jobs         Job[]    @relation("OwnerJobs")
   contractorOn Job[]    @relation("ContractorJobs")
+  managerLocation    Location? @relation("ManagerLocation", fields: [managerLocationId], references: [id])
+  managerLocationId  String?
+  organisations      Organisation[] @relation("UserOrganisations")
 
-  // RLS policies
-  // policy {}
+  // ── ZenStack RLS ─────────────────────────────
+  @@allow('read',  auth() != null)                                   // any logged-in user
+  @@allow('create', true)                                            // Supabase signup row
+  @@allow('update', auth().type == ADMIN || id == auth().id)         // self or admin
+  @@allow('delete', auth().type == ADMIN)
 }
 
 model Job {
@@ -26,17 +32,34 @@ model Job {
   location     Location? @relation(fields: [locationId], references: [id])
   locationId   String?
 
-  // RLS policies
-  // policy {}
+  // READ
+  @@allow('read',
+           auth().type == ADMIN ||
+           ownerId == auth().id ||
+           (auth().type == MANAGER && locationId == auth().managerLocationId) ||
+           (auth().type == CONTRACTOR && (status == AVAILABLE || contractorId == auth().id)))
+  // CREATE (owner creates own job)
+  @@allow('create', ownerId == auth().id)
+  // UPDATE
+  @@allow('update',
+           auth().type == ADMIN ||
+           (ownerId == auth().id && status in [PENDING_REVIEW, AVAILABLE]) ||
+           (auth().type == CONTRACTOR && contractorId == auth().id))
+  // DELETE
+  @@allow('delete', auth().type == ADMIN)
 }
 
 model Organisation {
   id        String     @id @default(uuid())
   name      String
+  owner     User?      @relation("UserOrganisations", fields: [ownerId], references: [id])
+  ownerId   String?
   locations Location[]
 
-  // RLS policies
-  // policy {}
+  @@allow('read',  auth().type == ADMIN || ownerId == auth().id)
+  @@allow('create', auth().type == ADMIN || auth().type == OWNER)
+  @@allow('update', auth().type == ADMIN || ownerId == auth().id)
+  @@allow('delete', auth().type == ADMIN)
 }
 
 model Location {
@@ -45,9 +68,15 @@ model Location {
   organisation   Organisation @relation(fields: [organisationId], references: [id])
   organisationId String
   jobs           Job[]
+  managers       User[]       @relation("ManagerLocation")
 
-  // RLS policies
-  // policy {}
+  @@allow('read',
+           auth().type == ADMIN ||
+           organisation.ownerId == auth().id ||
+           (auth().type == MANAGER && id == auth().managerLocationId))
+  @@allow('create', auth().type == ADMIN || organisation.ownerId == auth().id)
+  @@allow('update', auth().type == ADMIN || organisation.ownerId == auth().id)
+  @@allow('delete', auth().type == ADMIN)
 }
 
 enum UserType {
