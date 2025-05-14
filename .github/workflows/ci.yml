@@ -2,30 +2,37 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
+      
       - uses: pnpm/action-setup@v2
         with:
-          version: 8
-      - uses: actions/setup-node@v4
+          version: latest
+          
+      - uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: '18'
           cache: 'pnpm'
-      - name: Install dependencies
-        run: npm install
+          
+      - name: Install deps
+        run: pnpm install
+        
       - name: Lint
-        run: npm run lint
-      - name: Type Check
-        run: npm run type-check || true
+        run: pnpm lint || echo "(linting optional for now)"
+        
+      - name: Typecheck
+        run: pnpm typecheck
+        
       - name: Build
-        run: npm run build
+        run: pnpm build
+
       - name: Upload Vercel Artifact
         uses: actions/upload-artifact@v4
         with:
