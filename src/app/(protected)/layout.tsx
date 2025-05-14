@@ -5,13 +5,14 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [userType, setUserType] = useState<string | null>(null);
+  const supabase = getSupabaseClient();
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {

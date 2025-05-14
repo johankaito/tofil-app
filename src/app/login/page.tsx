@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useUser } from "@/components/UserContext";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const router = useRouter();
   const { setUser } = useUser();
+  const supabase = getSupabaseClient();
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {

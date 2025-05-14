@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 
 export default function ManagerDashboard() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [manager, setManager] = useState<any>(null);
   const router = useRouter();
+  const supabase = getSupabaseClient();
 
   useEffect(() => {
     async function fetchData() {
