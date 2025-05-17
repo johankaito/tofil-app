@@ -28,7 +28,7 @@ export default function SignupPage() {
         else if (userType === "ADMIN") router.replace("/admin");
       }
     });
-  }, []);
+  }, [router, supabase.auth]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();

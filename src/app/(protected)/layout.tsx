@@ -4,12 +4,10 @@ import { ReactNode, useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import { getSupabaseClient } from "@/lib/supabase";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const { resolvedTheme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [userType, setUserType] = useState<string | null>(null);
   const supabase = getSupabaseClient();
@@ -29,7 +27,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     });
-  }, [router]);
+  }, [router, supabase]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

@@ -38,3 +38,14 @@ jobs:
         with:
           name: vercel-artifact
           path: .vercel/output 
+
+name: Type Check
+on: [push, pull_request]
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+      - run: pnpm install
+      - run: pnpm typecheck 

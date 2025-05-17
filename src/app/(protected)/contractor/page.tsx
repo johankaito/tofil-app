@@ -1,11 +1,11 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { useTheme } from "next-themes";
+import { Job } from '@prisma/client';
 
-const jobs = [
-  { id: 1, title: "Job 1", location: "NYC", description: "Description of the job..." },
-  { id: 2, title: "Job 2", location: "SF", description: "Description of the job..." },
+const jobs: Job[] = [
+  { id: "1", title: "Job 1", description: "Description of the job...", status: "PENDING_REVIEW", ownerId: "", contractorId: null, locationId: "NYC" },
+  { id: "2", title: "Job 2", description: "Description of the job...", status: "PENDING_REVIEW", ownerId: "", contractorId: null, locationId: "SF" },
 ];
 
 function applyToJob(jobId: number) {
@@ -13,7 +13,7 @@ function applyToJob(jobId: number) {
 }
 
 export default function ContractorDashboard() {
-  const { resolvedTheme } = useTheme();
+  // const { resolvedTheme } = useTheme();
   // Example: you can use resolvedTheme for custom logic
   // console.log('Current theme:', resolvedTheme);
   return (
@@ -23,9 +23,9 @@ export default function ContractorDashboard() {
         {jobs.map(job => (
           <Card key={job.id} className="p-4 flex flex-col gap-2 bg-background-table text-foreground">
             <div className="font-semibold text-lg">{job.title}</div>
-            <div className="text-sm text-muted-foreground">{job.location}</div>
+            <div className="text-sm text-muted-foreground">{job.locationId}</div>
             <div className="text-sm">{job.description}</div>
-            <button className="mt-2 underline text-xs self-end text-accent hover:text-primary" onClick={() => applyToJob(job.id)}>Apply</button>
+            <button className="mt-2 underline text-xs self-end text-accent hover:text-primary" onClick={() => applyToJob(Number(job.id))}>Apply</button>
           </Card>
         ))}
       </div>

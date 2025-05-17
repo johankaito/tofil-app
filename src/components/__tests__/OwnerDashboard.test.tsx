@@ -1,6 +1,8 @@
+// @vitest-environment jsdom
+import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import OwnerDashboard from '@/app/(protected)/owner/page';
+import OwnerDashboard from '../OwnerDashboard';
 
 describe('OwnerDashboard', () => {
   it('renders without crashing', () => {

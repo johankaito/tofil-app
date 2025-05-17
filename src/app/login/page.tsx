@@ -23,7 +23,7 @@ export default function LoginPage() {
       const user = data.user;
       if (user) {
         // Fetch corresponding app user
-        let { data: tofilUser, error } = await supabase
+        let { data: tofilUser } = await supabase
           .from("User")
           .select("*")
           .eq("id", user.id)
@@ -42,7 +42,7 @@ export default function LoginPage() {
         setLoading(false);
       }
     });
-  }, [router, setUser]);
+  }, [router, setUser, supabase]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

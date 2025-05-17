@@ -3,15 +3,15 @@
 import React, { createContext, useContext, useState } from "react";
 
 export type UserContextType = {
-  supabaseUser: any;
-  tofilUser: any;
-  setUser: (user: { supabaseUser: any; tofilUser: any }) => void;
+  supabaseUser: unknown;
+  tofilUser: unknown;
+  setUser: (user: { supabaseUser: unknown; tofilUser: unknown }) => void;
 };
 
 const UserContext = createContext<{
-  supabaseUser: any;
-  tofilUser: any;
-  setUser: (user: { supabaseUser: any; tofilUser: any }) => void;
+  supabaseUser: unknown;
+  tofilUser: unknown;
+  setUser: (user: { supabaseUser: unknown; tofilUser: unknown }) => void;
 }>({
   supabaseUser: null,
   tofilUser: null,
@@ -19,10 +19,10 @@ const UserContext = createContext<{
 });
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [supabaseUser, setSupabaseUser] = useState<any>(null);
-  const [tofilUser, setTofilUser] = useState<any>(null);
+  const [supabaseUser, setSupabaseUser] = useState<unknown>(null);
+  const [tofilUser, setTofilUser] = useState<unknown>(null);
 
-  const setUser = ({ supabaseUser, tofilUser }: { supabaseUser: any; tofilUser: any }) => {
+  const setUser = ({ supabaseUser, tofilUser }: { supabaseUser: unknown; tofilUser: unknown }) => {
     setSupabaseUser(supabaseUser);
     setTofilUser(tofilUser);
   };

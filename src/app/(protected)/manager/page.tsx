@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { getSupabaseClient } from "@/lib/supabase";
+import { Job, User } from '@prisma/client';
 
 export default function ManagerDashboard() {
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [manager, setManager] = useState<any>(null);
+  const [manager, setManager] = useState<Pick<User, 'managerLocationId'> | null>(null);
   const router = useRouter();
   const supabase = getSupabaseClient();
 
@@ -39,7 +40,7 @@ export default function ManagerDashboard() {
       setLoading(false);
     }
     fetchData();
-  }, [router]);
+  }, [router, supabase]);
 
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center">Loading…</div>;
