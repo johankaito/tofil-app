@@ -138,26 +138,27 @@ function OwnerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchJobs() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch('/api/job');
-        if (!res.ok) throw new Error('Failed to fetch jobs');
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setJobs(data);
-        } else {
-          setJobs(mockJobs);
-        }
-      } catch {
-        setError('Could not load jobs, showing mock data.');
+  const fetchJobs = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/job');
+      if (!res.ok) throw new Error('Failed to fetch jobs');
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setJobs(data);
+      } else {
         setJobs(mockJobs);
-      } finally {
-        setLoading(false);
       }
+    } catch {
+      setError('Could not load jobs, showing mock data.');
+      setJobs(mockJobs);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchJobs();
   }, []);
 
@@ -191,11 +192,7 @@ function OwnerDashboard() {
                 <td className="p-2 border">{job.locationId}</td>
                 <td className="p-2 border">{job.contractorId ? job.contractorId : "N/A"}</td>
                 <td className="p-2 border">
-                  <RowActions job={job} onArchive={async () => {
-                    // Action handled in RowActions component
-                  }} onDuplicate={async () => {
-                    // Action handled in RowActions component
-                  }} />
+                  <RowActions job={job} onArchive={fetchJobs} onDuplicate={fetchJobs} />
                 </td>
               </tr>
             ))}
