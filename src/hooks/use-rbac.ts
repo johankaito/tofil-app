@@ -50,6 +50,17 @@ export function useRBAC() {
     return tofilUser.type === UserType.ADMIN || job.ownerId === tofilUser.id;
   };
 
+  const canUpdateJobStatus = (job: Job) => {
+    if (!tofilUser) return false;
+    if (tofilUser.type === UserType.ADMIN) return true;
+    if (job.ownerId === tofilUser.id) return true;
+    if (tofilUser.type === UserType.CONTRACTOR && job.contractorId === tofilUser.id) {
+      // Contractors can only update status to IN_PROGRESS or COMPLETED
+      return ['CLAIMED', 'IN_PROGRESS'].includes(job.status);
+    }
+    return false;
+  };
+
   return {
     canViewJob,
     canEditJob,
@@ -59,5 +70,6 @@ export function useRBAC() {
     canCompleteJob,
     canArchiveJob,
     canDuplicateJob,
+    canUpdateJobStatus,
   };
 } 

@@ -2,16 +2,13 @@
 
 import { Card } from "@/components/ui/card";
 import { Job } from '@prisma/client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { applyForJob, startJob, completeJob } from '@/app/actions/job';
 import { useToast } from "@/components/ui/use-toast";
 import { useRBAC } from '@/hooks/use-rbac';
 import { useUser } from '@/components/UserContext';
-
-const jobs: Job[] = [
-  { id: "1", title: "Job 1", description: "Description of the job...", status: "PENDING_REVIEW", ownerId: "", contractorId: null, locationId: "NYC" },
-  { id: "2", title: "Job 2", description: "Description of the job...", status: "PENDING_REVIEW", ownerId: "", contractorId: null, locationId: "SF" },
-];
+import { Button } from '@/components/ui/button';
+import { StatusBadge } from '@/components/StatusBadge';
 
 function StatusButton({ job, onAction }: { job: Job; onAction: (action: string) => void }) {
   const [loading, setLoading] = useState(false);
@@ -93,32 +90,74 @@ function StatusButton({ job, onAction }: { job: Job; onAction: (action: string) 
   };
 
   return (
-    <button
-      className="mt-2 underline text-xs self-end text-accent hover:text-primary disabled:opacity-50"
+    <Button
+      variant="secondary"
+      size="sm"
+      className="w-full"
       disabled={loading}
       onClick={handleAction}
     >
       {loading ? '...' : label}
-    </button>
+    </Button>
   );
 }
 
 export default function ContractorDashboard() {
   const { canViewJob } = useRBAC();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchJobs() {
+      try {
+        const response = await fetch('/api/job');
+        if (!response.ok) throw new Error('Failed to fetch jobs');
+        const data = await response.json();
+        setJobs(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load jobs');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchJobs();
+  }, []);
+
   const visibleJobs = jobs.filter(canViewJob);
 
   return (
-    <div className="bg-background min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Contractor Dashboard</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="bg-background min-h-screen p-4 md:p-6">
+      <h1 className="text-2xl font-bold mb-6">Contractor Dashboard</h1>
+      
+      {loading && (
+        <div className="flex items-center justify-center p-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      )}
+      
+      {error && (
+        <div className="mb-4 p-4 bg-destructive/10 text-destructive rounded-lg">
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {visibleJobs.map(job => (
-          <Card key={job.id} className="p-4 flex flex-col gap-2 bg-background-table text-foreground">
-            <div className="font-semibold text-lg">{job.title}</div>
-            <div className="text-sm text-muted-foreground">{job.locationId}</div>
-            <div className="text-sm">{job.description}</div>
-            <StatusButton job={job} onAction={() => {
-              // Action handled in StatusButton component
-            }} />
+          <Card key={job.id} className="p-4 flex flex-col gap-4 bg-background-table">
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-2">{job.title}</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <StatusBadge status={job.status} />
+                  <span className="text-sm text-muted-foreground">{job.locationId}</span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">{job.description}</p>
+                <StatusButton job={job} onAction={() => {
+                  // Action handled in StatusButton component
+                }} />
+              </div>
+            </div>
           </Card>
         ))}
       </div>

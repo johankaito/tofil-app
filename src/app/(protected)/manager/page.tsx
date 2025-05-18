@@ -1,91 +1,70 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/card";
-import { getSupabaseClient } from "@/lib/supabase";
-import { Job, User } from '@prisma/client';
+import { useState, useEffect } from 'react';
+import { Job } from '@prisma/client';
+import { useRBAC } from '@/hooks/use-rbac';
+import { Card } from '@/components/ui/card';
+import { StatusBadge } from '@/components/StatusBadge';
 
 export default function ManagerDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [manager, setManager] = useState<Pick<User, 'managerLocationId'> | null>(null);
-  const router = useRouter();
-  const supabase = getSupabaseClient();
+  const [error, setError] = useState<string | null>(null);
+  const { canViewJob } = useRBAC();
 
   useEffect(() => {
-    async function fetchData() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace("/login");
-        return;
-      }
-      // Fetch manager profile
-      const { data: profile } = await supabase
-        .from("User")
-        .select("*, managerLocation:managerLocationId")
-        .eq("id", user.id)
-        .single();
-      setManager(profile);
-      if (!profile?.managerLocationId) {
+    async function fetchJobs() {
+      try {
+        const response = await fetch('/api/job');
+        if (!response.ok) throw new Error('Failed to fetch jobs');
+        const data = await response.json();
+        setJobs(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load jobs');
+      } finally {
         setLoading(false);
-        return;
       }
-      // Fetch jobs for manager's location
-      const { data: jobsData } = await supabase
-        .from("Job")
-        .select("*")
-        .eq("locationId", profile.managerLocationId);
-      setJobs(jobsData || []);
-      setLoading(false);
     }
-    fetchData();
-  }, [router, supabase]);
+    fetchJobs();
+  }, []);
 
-  if (loading) {
-    return <div className="flex min-h-screen items-center justify-center">Loading…</div>;
-  }
-
-  if (!manager?.managerLocationId) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Card className="p-8 max-w-md text-center">
-          <div className="text-xl font-bold mb-2">Unassigned</div>
-          <div className="text-muted-foreground mb-4">You have not been assigned a location yet.</div>
-          <div className="text-sm">Please contact your Admin to be assigned to a location.</div>
-        </Card>
-      </div>
-    );
-  }
+  const visibleJobs = jobs.filter(canViewJob);
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Manager Dashboard</h1>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border text-sm">
-          <thead>
-            <tr className="bg-background-table text-foreground">
-              <th className="p-2 border">Title</th>
-              <th className="p-2 border">Status</th>
-              <th className="p-2 border">Location</th>
-              <th className="p-2 border">Contractor</th>
-            </tr>
-          </thead>
-          <tbody>
-            {jobs.map(job => (
-              <tr key={job.id} className="border-b bg-background-table text-foreground">
-                <td className="p-2 border">{job.title}</td>
-                <td className="p-2 border">
-                  <span className="px-2 py-1 rounded bg-accent text-foreground-dark text-xs font-semibold uppercase tracking-wide">
-                    {job.status.replace(/_/g, ' ')}
-                  </span>
-                </td>
-                <td className="p-2 border">{job.locationId}</td>
-                <td className="p-2 border">{job.contractorId || "-"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="bg-background min-h-screen p-4 md:p-6">
+      <h1 className="text-2xl font-bold mb-6">Manager Dashboard</h1>
+      
+      {loading && (
+        <div className="flex items-center justify-center p-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      )}
+      
+      {error && (
+        <div className="mb-4 p-4 bg-destructive/10 text-destructive rounded-lg">
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        {visibleJobs.map(job => (
+          <Card key={job.id} className="p-4 flex flex-col gap-4 bg-background-table">
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-2">{job.title}</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <StatusBadge status={job.status} />
+                  <span className="text-sm text-muted-foreground">{job.locationId}</span>
+                </div>
+                {job.contractorId && (
+                  <div className="text-sm text-muted-foreground">
+                    Contractor: {job.contractorId}
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
   );

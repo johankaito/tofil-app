@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
 import { Job, User, Location, JobStatus } from '@prisma/client';
 import { JobHistory } from "./JobHistory";
 import { Button } from "@/components/ui/button";

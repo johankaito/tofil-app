@@ -4,6 +4,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRBAC } from '@/hooks/use-rbac';
 import { useUser } from '@/components/UserContext';
 import { archiveJob, duplicateJob } from '@/app/actions/job';
+import { CreateJobModal } from './CreateJobModal';
+import { Button } from '@/components/ui/button';
+import { StatusBadge } from './StatusBadge';
+import { Card } from '@/components/ui/card';
 
 const mockJobs: Job[] = [
   { id: "1", title: "Job 1", description: "", status: "PENDING_REVIEW", ownerId: "", contractorId: null, locationId: "NYC" },
@@ -109,26 +113,30 @@ function RowActions({ job, onArchive, onDuplicate }: { job: Job; onArchive: () =
   };
 
   return (
-    <>
+    <div className="flex flex-wrap gap-2">
       {canDuplicateJob(job) && (
-        <button
-          className="mr-2 underline text-xs text-accent hover:text-primary disabled:opacity-50"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-accent hover:text-primary disabled:opacity-50"
           disabled={loading}
           onClick={handleDuplicate}
         >
           Duplicate
-        </button>
+        </Button>
       )}
       {canArchiveJob(job) && (
-        <button
-          className="underline text-xs text-accent hover:text-primary disabled:opacity-50"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-accent hover:text-primary disabled:opacity-50"
           disabled={loading}
           onClick={handleArchive}
         >
           Archive
-        </button>
+        </Button>
       )}
-    </>
+    </div>
   );
 }
 
@@ -137,6 +145,7 @@ function OwnerDashboard() {
   const [jobs, setJobs] = useState<Job[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const fetchJobs = async () => {
     setLoading(true);
@@ -165,40 +174,55 @@ function OwnerDashboard() {
   const visibleJobs = (jobs || mockJobs).filter(canViewJob);
 
   return (
-    <div className="bg-background min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Owner Dashboard</h1>
-      {loading && <div className="mb-4">Loading jobs...</div>}
-      {error && <div className="mb-4 text-red-500">{error}</div>}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border text-sm">
-          <thead>
-            <tr className="bg-background-table text-foreground">
-              <th className="p-2 border">Title</th>
-              <th className="p-2 border">Status</th>
-              <th className="p-2 border">Location</th>
-              <th className="p-2 border">Contractor</th>
-              <th className="p-2 border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visibleJobs.map(job => (
-              <tr key={job.id} className="border-b bg-background-table text-foreground">
-                <td className="p-2 border">{job.title}</td>
-                <td className="p-2 border">
-                  <span className="px-2 py-1 rounded bg-accent text-foreground-dark text-xs font-semibold uppercase tracking-wide">
-                    {job.status.replace(/_/g, ' ')}
-                  </span>
-                </td>
-                <td className="p-2 border">{job.locationId}</td>
-                <td className="p-2 border">{job.contractorId ? job.contractorId : "N/A"}</td>
-                <td className="p-2 border">
-                  <RowActions job={job} onArchive={fetchJobs} onDuplicate={fetchJobs} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="bg-background min-h-screen p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 className="text-2xl font-bold">Owner Dashboard</h1>
+        <Button onClick={() => setCreateModalOpen(true)}>
+          Create Job
+        </Button>
       </div>
+      
+      {loading && (
+        <div className="flex items-center justify-center p-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      )}
+      
+      {error && (
+        <div className="mb-4 p-4 bg-destructive/10 text-destructive rounded-lg">
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        {visibleJobs.map(job => (
+          <Card key={job.id} className="p-4 flex flex-col gap-4 bg-background-table">
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-2">{job.title}</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <StatusBadge status={job.status} />
+                  <span className="text-sm text-muted-foreground">{job.locationId}</span>
+                </div>
+                {job.contractorId && (
+                  <div className="text-sm text-muted-foreground">
+                    Contractor: {job.contractorId}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="mt-auto">
+              <RowActions job={job} onArchive={fetchJobs} onDuplicate={fetchJobs} />
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <CreateJobModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onJobCreated={fetchJobs}
+      />
     </div>
   );
 }
