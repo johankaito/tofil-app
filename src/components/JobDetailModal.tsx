@@ -1,78 +1,76 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Job, User } from '@prisma/client';
-import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Job, User, Location } from '@prisma/client';
+import { JobHistory } from "./JobHistory";
+import { Button } from "@/components/ui/button";
 
 type JobHistoryLite = {
   id: string;
-  jobId: string;
-  userId: string;
   action: string;
-  createdAt: Date | string;
-  user: User;
+  createdAt: Date;
+  user: {
+    email: string;
+  };
 };
 
 type JobWithHistory = Job & {
   jobHistories: JobHistoryLite[];
+  owner: User;
+  contractor?: User;
+  location?: Location;
 };
 
-interface JobDetailModalProps {
-  job: JobWithHistory | null;
+type JobDetailModalProps = {
+  job: JobWithHistory;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
+};
 
 export function JobDetailModal({ job, open, onOpenChange }: JobDetailModalProps) {
-  if (!job) return null;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{job.title}</DialogTitle>
+          <DialogDescription>{job.description}</DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
+        
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground">Description</h3>
-            <p className="mt-1">{job.description}</p>
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
-            <p className="mt-1">
-              <span className="px-2 py-1 rounded bg-accent text-foreground-dark text-xs font-semibold uppercase tracking-wide">
-                {job.status.replace(/_/g, ' ')}
-              </span>
-            </p>
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">Location</h3>
-            <p className="mt-1">{job.locationId}</p>
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">Contractor</h3>
-            <p className="mt-1">{job.contractorId ? job.contractorId : "Not assigned"}</p>
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">History</h3>
-            <div className="mt-2 space-y-2">
-              {job.jobHistories.map((history) => (
-                <div key={history.id} className="flex items-start space-x-2 text-sm">
-                  <div className="flex-1">
-                    <p>
-                      <span className="font-medium">{history.user.email}</span>
-                      {" "}
-                      <span className="text-muted-foreground">
-                        {history.action.toLowerCase()}d the job
-                      </span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(history.createdAt), 'PPp')}
-                    </p>
-                  </div>
+            <h3 className="font-semibold mb-2">Job Details</h3>
+            <div className="space-y-2">
+              <div>
+                <span className="text-muted-foreground">Status:</span>{" "}
+                <span className="font-medium">{job.status}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Owner:</span>{" "}
+                <span className="font-medium">{job.owner.email}</span>
+              </div>
+              {job.contractor && (
+                <div>
+                  <span className="text-muted-foreground">Contractor:</span>{" "}
+                  <span className="font-medium">{job.contractor.email}</span>
                 </div>
-              ))}
+              )}
+              {job.location && (
+                <div>
+                  <span className="text-muted-foreground">Location:</span>{" "}
+                  <span className="font-medium">{job.location.name}</span>
+                </div>
+              )}
             </div>
           </div>
+          
+          <div>
+            <JobHistory jobId={job.id} />
+          </div>
         </div>
+
+        <DialogFooter>
+          <Button onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

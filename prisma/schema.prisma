@@ -8,10 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 enum UserType {
   ADMIN
   OWNER
@@ -37,21 +33,21 @@ model User {
   managerLocation   Location?      @relation("ManagerLocation", fields: [managerLocationId], references: [id])
   managerLocationId String?
   organisations     Organisation[] @relation("UserOrganisations")
-  jobHistory        JobHistory[]
+  jobHistories      JobHistory[]   @relation("UserJobHistories")
 }
 
 model Job {
-  id           String        @id() @default(uuid())
+  id           String       @id() @default(uuid())
   title        String
   description  String
-  status       JobStatus     @default(PENDING_REVIEW)
-  owner        User          @relation("OwnerJobs", fields: [ownerId], references: [id])
+  status       JobStatus    @default(PENDING_REVIEW)
+  owner        User         @relation("OwnerJobs", fields: [ownerId], references: [id])
   ownerId      String
-  contractor   User?         @relation("ContractorJobs", fields: [contractorId], references: [id])
+  contractor   User?        @relation("ContractorJobs", fields: [contractorId], references: [id])
   contractorId String?
-  location     Location?     @relation(fields: [locationId], references: [id])
+  location     Location?    @relation(fields: [locationId], references: [id])
   locationId   String?
-  history      JobHistory[]
+  jobHistories JobHistory[] @relation("JobJobHistories")
 }
 
 model Organisation {
@@ -73,13 +69,10 @@ model Location {
 
 model JobHistory {
   id        String   @id() @default(uuid())
-  job       Job      @relation(fields: [jobId], references: [id])
+  job       Job      @relation("JobJobHistories", fields: [jobId], references: [id])
   jobId     String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation("UserJobHistories", fields: [userId], references: [id])
   userId    String
   action    String
   createdAt DateTime @default(now())
-
-  @@index([jobId])
-  @@index([userId])
 }
