@@ -82,7 +82,7 @@ export default function LoginPage() {
           .single();
         if (!tofilUser) {
           // If not found, create user in app DB
-          const { data: inserted } = await supabase.from("User").insert({ id: data.user.id, email: data.user.email, type: "OWNER" }).select().single();
+          const { data: inserted } = await supabase.from("User").insert({ id: data.user.id, email: data.user.email, type: "CONTRACTOR" }).select().single();
           tofilUser = inserted;
         }
         setUser({ supabaseUser: data.user, tofilUser });
