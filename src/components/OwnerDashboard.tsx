@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Job } from '@prisma/client';
 import { useToast } from "@/components/ui/use-toast";
 import { useRBAC } from '@/hooks/use-rbac';
 import { useUser } from '@/components/UserContext';
 import { archiveJob, duplicateJob } from '@/app/actions/job';
 
-const jobs: Job[] = [
+const mockJobs: Job[] = [
   { id: "1", title: "Job 1", description: "", status: "PENDING_REVIEW", ownerId: "", contractorId: null, locationId: "NYC" },
   { id: "2", title: "Job 2", description: "", status: "IN_PROGRESS", ownerId: "", contractorId: null, locationId: "SF" },
 ];
@@ -134,11 +134,40 @@ function RowActions({ job, onArchive, onDuplicate }: { job: Job; onArchive: () =
 
 function OwnerDashboard() {
   const { canViewJob } = useRBAC();
-  const visibleJobs = jobs.filter(canViewJob);
+  const [jobs, setJobs] = useState<Job[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchJobs() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch('/api/job');
+        if (!res.ok) throw new Error('Failed to fetch jobs');
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setJobs(data);
+        } else {
+          setJobs(mockJobs);
+        }
+      } catch {
+        setError('Could not load jobs, showing mock data.');
+        setJobs(mockJobs);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchJobs();
+  }, []);
+
+  const visibleJobs = (jobs || mockJobs).filter(canViewJob);
 
   return (
     <div className="bg-background min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Owner Dashboard</h1>
+      {loading && <div className="mb-4">Loading jobs...</div>}
+      {error && <div className="mb-4 text-red-500">{error}</div>}
       <div className="overflow-x-auto">
         <table className="min-w-full border text-sm">
           <thead>
