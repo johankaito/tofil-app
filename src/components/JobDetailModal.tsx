@@ -1,25 +1,79 @@
-import { Card } from "@/components/ui/card";
-import { useTheme } from "next-themes";
-import { Job } from '@prisma/client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Job, User } from '@prisma/client';
+import { format } from 'date-fns';
 
-export function JobDetailModal({ job, onClose }: { job: Job; onClose: () => void }) {
-  const { resolvedTheme } = useTheme();
+type JobHistoryLite = {
+  id: string;
+  jobId: string;
+  userId: string;
+  action: string;
+  createdAt: Date | string;
+  user: User;
+};
+
+type JobWithHistory = Job & {
+  jobHistories: JobHistoryLite[];
+};
+
+interface JobDetailModalProps {
+  job: JobWithHistory | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function JobDetailModal({ job, open, onOpenChange }: JobDetailModalProps) {
   if (!job) return null;
-  const overlayBg = resolvedTheme === "dark" ? "bg-black/40" : "bg-black/20";
-  const placeholderBg = resolvedTheme === "dark" ? "bg-muted" : "bg-gray-100";
+
   return (
-    <div className={`fixed inset-0 flex items-center justify-center z-50 ${overlayBg}`}>
-      <Card className="w-full max-w-md p-6 relative">
-        <button className="absolute top-2 right-2 text-lg" onClick={onClose}>&times;</button>
-        <div className="font-bold text-xl mb-2">{job.title}</div>
-        <div className="text-muted-foreground mb-2">{job.locationId}</div>
-        <div className="mb-4">{job.description}</div>
-        <div className={`${placeholderBg} h-32 mb-4 flex items-center justify-center`}>Media Placeholder</div>
-        <div className="flex gap-2 justify-end">
-          <button className="underline text-xs" onClick={() => alert('Options stub')}>Options</button>
-          <button className="underline text-xs" onClick={() => alert('Apply stub')}>Apply</button>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{job.title}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">Description</h3>
+            <p className="mt-1">{job.description}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+            <p className="mt-1">
+              <span className="px-2 py-1 rounded bg-accent text-foreground-dark text-xs font-semibold uppercase tracking-wide">
+                {job.status.replace(/_/g, ' ')}
+              </span>
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">Location</h3>
+            <p className="mt-1">{job.locationId}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">Contractor</h3>
+            <p className="mt-1">{job.contractorId ? job.contractorId : "Not assigned"}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground">History</h3>
+            <div className="mt-2 space-y-2">
+              {job.jobHistories.map((history) => (
+                <div key={history.id} className="flex items-start space-x-2 text-sm">
+                  <div className="flex-1">
+                    <p>
+                      <span className="font-medium">{history.user.email}</span>
+                      {" "}
+                      <span className="text-muted-foreground">
+                        {history.action.toLowerCase()}d the job
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(history.createdAt), 'PPp')}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </Card>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 } 

@@ -12,6 +12,7 @@ model User {
   managerLocation    Location? @relation("ManagerLocation", fields: [managerLocationId], references: [id])
   managerLocationId  String?
   organisations      Organisation[] @relation("UserOrganisations")
+  jobHistories       JobHistory[]   @relation("UserJobHistories")
 
   // ── ZenStack RLS ─────────────────────────────
   @@allow('read',  auth() != null)                                   // any logged-in user
@@ -31,6 +32,7 @@ model Job {
   contractorId String?
   location     Location? @relation(fields: [locationId], references: [id])
   locationId   String?
+  jobHistories JobHistory[] @relation("JobJobHistories")
 
   // READ
   @@allow('read',
@@ -77,6 +79,16 @@ model Location {
   @@allow('create', auth().type == ADMIN || organisation.ownerId == auth().id)
   @@allow('update', auth().type == ADMIN || organisation.ownerId == auth().id)
   @@allow('delete', auth().type == ADMIN)
+}
+
+model JobHistory {
+  id         String   @id @default(uuid())
+  job        Job      @relation("JobJobHistories", fields: [jobId], references: [id])
+  jobId      String
+  user       User     @relation("UserJobHistories", fields: [userId], references: [id])
+  userId     String
+  action     String
+  createdAt  DateTime @default(now())
 }
 
 enum UserType {
