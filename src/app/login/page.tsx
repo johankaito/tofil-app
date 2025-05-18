@@ -11,9 +11,11 @@ import { getSupabaseClient } from "@/lib/supabase";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   const router = useRouter();
   const { setUser } = useUser();
   const supabase = getSupabaseClient();
@@ -48,9 +50,48 @@ export default function LoginPage() {
     e.preventDefault();
     setFormLoading(true);
     setMessage("");
-    const { error } = await supabase.auth.signInWithOtp({ email });
-    if (error) setMessage(error.message);
-    else setMessage("Check your email for the magic link!");
+
+    if (!otpSent) {
+      const { error } = await supabase.auth.signInWithOtp({ 
+        email,
+        options: {
+          shouldCreateUser: false
+        }
+      });
+      if (error) {
+        setMessage(error.message);
+      } else {
+        setMessage("Check your email for the OTP code!");
+        setOtpSent(true);
+      }
+    } else {
+      const { error, data } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email'
+      });
+      
+      if (error) {
+        setMessage(error.message);
+      } else if (data.user) {
+        // Fetch corresponding app user
+        let { data: tofilUser } = await supabase
+          .from("User")
+          .select("*")
+          .eq("id", data.user.id)
+          .single();
+        if (!tofilUser) {
+          // If not found, create user in app DB
+          const { data: inserted } = await supabase.from("User").insert({ id: data.user.id, email: data.user.email, type: "OWNER" }).select().single();
+          tofilUser = inserted;
+        }
+        setUser({ supabaseUser: data.user, tofilUser });
+        const userType = tofilUser?.type || "OWNER";
+        if (userType === "OWNER") router.replace("/owner");
+        else if (userType === "CONTRACTOR") router.replace("/contractor");
+        else if (userType === "ADMIN") router.replace("/admin");
+      }
+    }
     setFormLoading(false);
   };
 
@@ -80,8 +121,20 @@ export default function LoginPage() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
+            disabled={otpSent}
           />
-          <Button className="w-full" type="submit" disabled={formLoading}>{formLoading ? "Sending..." : "Login"}</Button>
+          {otpSent && (
+            <Input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={e => setOtp(e.target.value)}
+              required
+            />
+          )}
+          <Button className="w-full" type="submit" disabled={formLoading}>
+            {formLoading ? "Processing..." : otpSent ? "Verify OTP" : "Send OTP"}
+          </Button>
         </form>
         {message && <p className="text-center text-sm text-muted-foreground">{message}</p>}
         <div className="text-center">
