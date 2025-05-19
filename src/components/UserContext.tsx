@@ -1,28 +1,33 @@
 "use client";
 
 import React, { createContext, useContext, useState } from "react";
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
-export type UserContextType = {
-  supabaseUser: unknown;
-  tofilUser: any;
-  setUser: (user: { supabaseUser: unknown; tofilUser: any }) => void;
+export type TofilUser = {
+  id: string;
+  email: string;
+  type: 'OWNER' | 'CONTRACTOR' | 'ADMIN';
+  created_at?: string;
+  updated_at?: string;
 };
 
-const UserContext = createContext<{
-  supabaseUser: unknown;
-  tofilUser: any;
-  setUser: (user: { supabaseUser: unknown; tofilUser: any }) => void;
-}>({
+export type UserContextType = {
+  supabaseUser: SupabaseUser | null;
+  tofilUser: TofilUser | null;
+  setUser: (user: { supabaseUser: SupabaseUser | null; tofilUser: TofilUser | null }) => void;
+};
+
+const UserContext = createContext<UserContextType>({
   supabaseUser: null,
   tofilUser: null,
   setUser: () => {},
 });
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [supabaseUser, setSupabaseUser] = useState<unknown>(null);
-  const [tofilUser, setTofilUser] = useState<any>(null);
+  const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
+  const [tofilUser, setTofilUser] = useState<TofilUser | null>(null);
 
-  const setUser = ({ supabaseUser, tofilUser }: { supabaseUser: unknown; tofilUser: any }) => {
+  const setUser = ({ supabaseUser, tofilUser }: { supabaseUser: SupabaseUser | null; tofilUser: TofilUser | null }) => {
     setSupabaseUser(supabaseUser);
     setTofilUser(tofilUser);
   };
