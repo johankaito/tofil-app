@@ -1,99 +1,96 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useUser } from "@/components/UserContext";
 import { getSupabaseClient } from "@/lib/supabase";
+import { LoginForm } from "@/components/login-form";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [otp, setOtp] = useState("");
+  const [showOtpInput, setShowOtpInput] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
   const { setUser } = useUser();
   const supabase = getSupabaseClient();
 
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      const user = data.user;
-      if (user) {
-        // Fetch corresponding app user
-        let { data: tofilUser } = await supabase
-          .from("User")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-        if (!tofilUser) {
-          // If not found, create user in app DB
-          const { data: inserted } = await supabase.from("User").insert({ id: user.id, email: user.email, type: "OWNER" }).select().single();
-          tofilUser = inserted;
-        }
-        setUser({ supabaseUser: user, tofilUser });
-        const userType = tofilUser?.type || "OWNER";
-        if (userType === "OWNER") router.replace("/owner");
-        else if (userType === "CONTRACTOR") router.replace("/contractor");
-        else if (userType === "ADMIN") router.replace("/admin");
-      } else {
-        setLoading(false);
-      }
-    });
-  }, [router, setUser, supabase]);
-
-  const handleLogin = async (e: React.FormEvent) => {
+  // Handle email submit (send OTP)
+  const onEmailSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormLoading(true);
     setMessage("");
     const { error } = await supabase.auth.signInWithOtp({ email });
-    if (error) setMessage(error.message);
-    else setMessage("Check your email for the magic link!");
+    if (error) {
+      setMessage(error.message);
+      setFormLoading(false);
+      return;
+    }
+    setShowOtpInput(true);
+    setMessage("OTP sent! Please check your email.");
     setFormLoading(false);
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-6">
-          <Image src="/logo.png" alt="Tofil Logo" width={64} height={64} className="mx-auto" />
-          <div className="text-lg animate-pulse">Checking authentication…</div>
-        </div>
-      </div>
-    );
-  }
+  // Handle OTP submit (verify OTP)
+  const onOtpSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormLoading(true);
+    setMessage("");
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token: otp,
+      type: "email",
+    });
+    if (error) {
+      setMessage(error.message);
+      setFormLoading(false);
+      return;
+    }
+    // Fetch or create app user
+    let { data: tofilUser } = await supabase
+      .from("User")
+      .select("*")
+      .eq("id", data.user?.id)
+      .single();
+    if (!tofilUser && data.user) {
+      const { data: inserted } = await supabase.from("User").insert({ id: data.user.id, email: data.user.email, type: "OWNER" }).select().single();
+      tofilUser = inserted;
+    }
+    setUser({ supabaseUser: data.user, tofilUser });
+    const userType = tofilUser?.type || "OWNER";
+    if (userType === "OWNER") router.replace("/owner");
+    else if (userType === "CONTRACTOR") router.replace("/contractor");
+    else if (userType === "ADMIN") router.replace("/admin");
+    setFormLoading(false);
+  };
 
-  /*
+  const onBackToEmail = () => {
+    setShowOtpInput(false);
+    setOtp("");
+    setMessage("");
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <Card className="w-full max-w-sm p-6 space-y-6">
-        <div className="flex justify-center mb-2">
-          <Image src="/logo.png" alt="Tofil Logo" width={64} height={64} />
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <LoginForm
+        email={email}
+        setEmail={setEmail}
+        otp={otp}
+        setOtp={setOtp}
+        showOtpInput={showOtpInput}
+        formLoading={formLoading}
+        onEmailSubmit={onEmailSubmit}
+        onOtpSubmit={onOtpSubmit}
+        onBackToEmail={onBackToEmail}
+        logoSrc="/logo.png"
+        appName="Tofil"
+      />
+      {message && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-card border border-border px-4 py-2 rounded shadow text-center z-50">
+          <span className="text-sm text-muted-foreground">{message}</span>
         </div>
-        <h1 className="text-2xl font-bold text-center">Login</h1>
-        <p className="text-center text-muted-foreground">Login to your account</p>
-        <form className="space-y-4" onSubmit={handleLogin}>
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
-          <Button className="w-full" type="submit" disabled={formLoading}>{formLoading ? "Sending..." : "Login"}</Button>
-        </form>
-        {message && <p className="text-center text-sm text-muted-foreground">{message}</p>}
-        <div className="text-center">
-          <a href="/signup" className="text-sm underline">Sign up</a>
-        </div>
-      </Card>
+      )}
     </div>
   );
-  */
-
-  return (
-    <div className="bg-green-500 text-white p-10">Test Tailwind</div> 
-  )
 }

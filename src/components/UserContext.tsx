@@ -6,7 +6,8 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 export type TofilUser = {
   id: string;
   email: string;
-  type: 'OWNER' | 'CONTRACTOR' | 'ADMIN';
+  type: 'OWNER' | 'CONTRACTOR' | 'ADMIN' | 'MANAGER';
+  managerLocationId?: string;
   created_at?: string;
   updated_at?: string;
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Job } from '@prisma/client';
+import type { Job } from '@prisma/client';
 import { useState, useEffect } from 'react';
 import { applyForJob, startJob, completeJob } from '@/app/actions/job';
 import { useToast } from "@/components/ui/use-toast";

@@ -124,9 +124,9 @@ export function LoginForm({
           <div className="mt-2 text-center text-sm">
             <span className="text-muted-foreground">Don&apos;t have an account? </span>
             <Link href="/signup" className="underline underline-offset-4 text-primary hover:text-primary/90">
-              Sign up
+                Sign up
             </Link>
-          </div>
+            </div>
         </CardContent>
       </Card>
     </div>

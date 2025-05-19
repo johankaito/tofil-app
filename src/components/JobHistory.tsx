@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getJobHistory, JobHistoryAction } from "@/lib/services/jobHistory";
-import { format } from "date-fns";
+// import { format } from "date-fns";
 import { IconClock } from "@tabler/icons-react";
 
 type JobHistoryEntry = {
@@ -85,7 +85,7 @@ export function JobHistory({ jobId }: { jobId: string }) {
               <div className="flex items-center justify-between">
                 <span className="font-medium">{actionLabels[entry.action]}</span>
                 <span className="text-sm text-muted-foreground">
-                  {format(new Date(entry.createdAt), "MMM d, yyyy h:mm a")}
+                  {/* {format(new Date(entry.createdAt), "MMM d, yyyy h:mm a")} */}
                 </span>
               </div>
               {entry.details && (

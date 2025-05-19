@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
-import "./globals.css";
+import "./globals.css"; // or wherever your Tailwind CSS file is
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { UserProvider } from "@/components/UserContext";
 import { Toaster } from "@/components/ui/toaster";
@@ -26,9 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
-        className={`${inter.variable} ${robotoMono.variable} antialiased bg-background`}
+        className={`${inter.variable} ${robotoMono.variable} antialiased bg-background dark:bg-black`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <UserProvider>

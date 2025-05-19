@@ -16,7 +16,7 @@ type JobWithHistory = Job & {
     createdAt: Date;
     user: {
       email: string;
-    };
+};
   }[];
   owner: User;
   contractor?: User;
@@ -101,10 +101,10 @@ export function JobDetailModal({ job, open, onOpenChange, onJobUpdate }: JobDeta
       description={job.description}
     >
       <div className="grid grid-cols-2 gap-4">
-        <div>
+          <div>
           <h3 className="font-semibold mb-2">Job Details</h3>
           <div className="space-y-2">
-            <div>
+          <div>
               <span className="text-muted-foreground">Status:</span>{" "}
               {canUpdateJobStatus(job) ? (
                 <Select
@@ -126,22 +126,22 @@ export function JobDetailModal({ job, open, onOpenChange, onJobUpdate }: JobDeta
               ) : (
                 <span className="font-medium">{job.status}</span>
               )}
-            </div>
-            <div>
+          </div>
+          <div>
               <span className="text-muted-foreground">Owner:</span>{" "}
               <span className="font-medium">{job.owner.email}</span>
-            </div>
+          </div>
             {job.contractor && (
-              <div>
+          <div>
                 <span className="text-muted-foreground">Contractor:</span>{" "}
                 <span className="font-medium">{job.contractor.email}</span>
-              </div>
+          </div>
             )}
             {job.location && (
-              <div>
+          <div>
                 <span className="text-muted-foreground">Location:</span>{" "}
                 <span className="font-medium">{job.location.name}</span>
-              </div>
+                  </div>
             )}
           </div>
         </div>
