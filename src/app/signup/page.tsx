@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -64,28 +65,42 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <Card className="w-full max-w-sm p-6 space-y-6">
-        <div className="flex justify-center mb-2">
-          <Image src="/logo.png" alt="Tofil Logo" width={64} height={64} />
-        </div>
-        <h1 className="text-2xl font-bold text-center">Sign Up</h1>
-        <p className="text-center text-muted-foreground">Create a new account</p>
-        <form className="space-y-4" onSubmit={handleSignup}>
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
-          <Button className="w-full" type="submit" disabled={loading}>{loading ? "Sending..." : "Sign Up"}</Button>
+    <div className="bg-background text-white min-h-screen flex items-center justify-center px-4">
+      <Card className="bg-surface border border-border shadow-lg rounded-lg max-w-md w-full mx-auto px-6 py-8">
+        <Image src="/logo.png" alt="Tofil Logo" width={64} height={64} className="mb-6" />
+        <h1 className="text-3xl font-bold mb-2 text-white">Tofil</h1>
+        <h2 className="text-2xl font-semibold mb-4 text-white">Sign Up</h2>
+        <p className="text-muted mb-6 text-center">Create a new account</p>
+        <form className="w-full flex flex-col gap-4" onSubmit={handleSignup}>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="email" className="text-white">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="jess....@example.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              className="bg-[#111111] border border-[#333] text-white placeholder-muted"
+              autoComplete="email"
+              disabled={loading}
+            />
+          </div>
+          <Button
+            type="submit"
+            className="w-full bg-primary text-white hover:bg-primary-light rounded-md py-2 font-semibold text-base"
+            disabled={loading}
+          >
+            {loading ? "Sending..." : "Sign Up"}
+          </Button>
         </form>
-        {message && <p className="text-center text-sm text-muted-foreground">{message}</p>}
-        <div className="text-center">
-          <a href="/login" className="text-sm underline">Back to login</a>
+        {message && <p className="text-center text-sm text-muted-foreground mt-4">{message}</p>}
+        <div className="mt-6 text-sm text-muted text-center w-full">
+          Already have an account?{' '}
+          <a href="/login" className="text-accent hover:underline">Back to login</a>
         </div>
       </Card>
+      <footer className="text-sm text-muted text-center mt-6">Powered by Tofil Group</footer>
     </div>
   );
 } 

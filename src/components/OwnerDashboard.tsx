@@ -140,7 +140,7 @@ function RowActions({ job, onArchive, onDuplicate }: { job: Job; onArchive: () =
   );
 }
 
-function OwnerDashboard() {
+export default function OwnerDashboard() {
   const { canViewJob } = useRBAC();
   const [jobs, setJobs] = useState<Job[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -174,57 +174,58 @@ function OwnerDashboard() {
   const visibleJobs = (jobs || mockJobs).filter(canViewJob);
 
   return (
-    <div className="bg-background min-h-screen p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Owner Dashboard</h1>
-        <Button onClick={() => setCreateModalOpen(true)}>
-          Create Job
-        </Button>
-      </div>
-      
-      {loading && (
-        <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    <div className="bg-background min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold mb-6 text-white">Owner Dashboard</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <Button onClick={() => setCreateModalOpen(true)}>
+            Create Job
+          </Button>
         </div>
-      )}
-      
-      {error && (
-        <div className="mb-4 p-4 bg-destructive/10 text-destructive rounded-lg">
-          {error}
-        </div>
-      )}
+        
+        {loading && (
+          <div className="flex items-center justify-center p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        )}
+        
+        {error && (
+          <div className="mb-4 p-4 bg-destructive/10 text-destructive rounded-lg">
+            {error}
+          </div>
+        )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        {visibleJobs.map(job => (
-          <Card key={job.id} className="p-4 flex flex-col gap-4 bg-background-table">
-            <div className="flex justify-between items-start gap-4">
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg mb-2">{job.title}</h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <StatusBadge status={job.status} />
-                  <span className="text-sm text-muted-foreground">{job.locationId}</span>
-                </div>
-                {job.contractorId && (
-                  <div className="text-sm text-muted-foreground">
-                    Contractor: {job.contractorId}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          {visibleJobs.map(job => (
+            <Card key={job.id} className="p-4 flex flex-col gap-4 bg-background-table">
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg mb-2">{job.title}</h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <StatusBadge status={job.status} />
+                    <span className="text-sm text-muted-foreground">{job.locationId}</span>
                   </div>
-                )}
+                  {job.contractorId && (
+                    <div className="text-sm text-muted-foreground">
+                      Contractor: {job.contractorId}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="mt-auto">
-              <RowActions job={job} onArchive={fetchJobs} onDuplicate={fetchJobs} />
-            </div>
-          </Card>
-        ))}
-      </div>
+              <div className="mt-auto">
+                <RowActions job={job} onArchive={fetchJobs} onDuplicate={fetchJobs} />
+              </div>
+            </Card>
+          ))}
+        </div>
 
-      <CreateJobModal
-        open={createModalOpen}
-        onOpenChange={setCreateModalOpen}
-        onJobCreated={fetchJobs}
-      />
+        <CreateJobModal
+          open={createModalOpen}
+          onOpenChange={setCreateModalOpen}
+          onJobCreated={fetchJobs}
+        />
+      </div>
+      <footer className="text-sm text-muted text-center mt-6">Powered by Tofil Group</footer>
     </div>
   );
-}
-
-export default OwnerDashboard; 
+} 

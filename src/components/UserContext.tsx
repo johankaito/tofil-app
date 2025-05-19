@@ -1,18 +1,17 @@
 "use client";
 
 import React, { createContext, useContext, useState } from "react";
-import { User } from "@prisma/client";
 
 export type UserContextType = {
   supabaseUser: unknown;
-  tofilUser: User | null;
-  setUser: (user: { supabaseUser: unknown; tofilUser: User | null }) => void;
+  tofilUser: any;
+  setUser: (user: { supabaseUser: unknown; tofilUser: any }) => void;
 };
 
 const UserContext = createContext<{
   supabaseUser: unknown;
-  tofilUser: User | null;
-  setUser: (user: { supabaseUser: unknown; tofilUser: User | null }) => void;
+  tofilUser: any;
+  setUser: (user: { supabaseUser: unknown; tofilUser: any }) => void;
 }>({
   supabaseUser: null,
   tofilUser: null,
@@ -21,9 +20,9 @@ const UserContext = createContext<{
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [supabaseUser, setSupabaseUser] = useState<unknown>(null);
-  const [tofilUser, setTofilUser] = useState<User | null>(null);
+  const [tofilUser, setTofilUser] = useState<any>(null);
 
-  const setUser = ({ supabaseUser, tofilUser }: { supabaseUser: unknown; tofilUser: User | null }) => {
+  const setUser = ({ supabaseUser, tofilUser }: { supabaseUser: unknown; tofilUser: any }) => {
     setSupabaseUser(supabaseUser);
     setTofilUser(tofilUser);
   };
